@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biomolecules Escape Room</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* Custom scrollbar for better look */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header Navigation -->
+    <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-10">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h1 class="text-2xl font-bold text-teal-400 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                </svg>
+                Bio-Lab Escape
+            </h1>
+            <nav id="nav-buttons" class="flex gap-2 hidden">
+                <button onclick="app.setView('discover')" id="btn-nav-discover" class="px-5 py-2 rounded-lg font-semibold transition-colors bg-slate-700 text-white hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-teal-400">
+                    📖 Discover
+                </button>
+                <button onclick="app.setView('challenge')" id="btn-nav-challenge" class="px-5 py-2 rounded-lg font-semibold transition-colors bg-teal-600 text-white hover:bg-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-400">
+                    🧩 Challenge
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="app-content" class="flex-grow max-w-4xl w-full mx-auto p-4 sm:p-6 md:p-8 flex flex-col fade-in">
+        <!-- Content injected by JS -->
+    </main>
+
+    <script>
+        // --- DATA STRUCTURES ---
+
+        const discoverCards = [
+            {
+                id: "c1",
+                title: "1. Monomers & Polymers",
+                content: "Biomolecules are large macromolecules (polymers) built by linking together smaller repeating building blocks called monomers. Think of monomers as individual Lego bricks, and polymers as the complex structures you build with them. They are joined through a process called dehydration synthesis (removing water)."
+            },
+            {
+                id: "c2",
+                title: "2. Carbohydrates",
+                content: "Made of Carbon, Hydrogen, and Oxygen. Their monomers are monosaccharides (simple sugars like glucose). Carbohydrates act as the primary source of quick energy for cells and provide structural support (like cellulose in plants)."
+            },
+            {
+                id: "c3",
+                title: "3. Lipids",
+                content: "Include fats, oils, and waxes. They are notably hydrophobic (they repel and do not mix with water). Lipids are used for long-term energy storage, insulation, and are the main component of cell membranes (specifically, phospholipids which form a bilayer)."
+            },
+            {
+                id: "c4",
+                title: "4. Proteins",
+                content: "Highly complex molecules whose monomers are amino acids. Proteins must fold into very specific 3D shapes to work properly. They have many roles: enzymes (speeding up chemical reactions), structural support, and transporting substances. A protein's shape directly determines its function."
+            },
+            {
+                id: "c5",
+                title: "5. Nucleic Acids",
+                content: "These include DNA and RNA. Their monomers are nucleotides. Their primary function is to store and transmit genetic information, which contains the instructions for building proteins. DNA is typically double-stranded, while RNA is single-stranded."
+            }
+        ];
+
+        const challenges = [
+            {
+                type: "mcq",
+                question: "You need a burst of energy to override the lab's manual door. Which biomolecule is the primary source of quick energy for cells?",
+                options: ["Proteins", "Nucleic Acids", "Carbohydrates", "Lipids"],
+                answer: "Carbohydrates",
+                hint: "Think about what athletes consume before a big race for fast fuel.",
+                explanation: "Carbohydrates, specifically simple sugars, are broken down quickly by cells to release immediate energy.",
+                relatedCard: "c2"
+            },
+            {
+                type: "mcq",
+                question: "To synthesize a key enzyme, you must identify its building blocks. What are the monomers of proteins?",
+                options: ["Monosaccharides", "Amino acids", "Nucleotides", "Fatty acids"],
+                answer: "Amino acids",
+                hint: "There are 20 different standard types of these building blocks that link together in chains.",
+                explanation: "Proteins are polymers constructed from monomers called amino acids.",
+                relatedCard: "c4"
+            },
+            {
+                type: "mcq",
+                question: "You need to mix a lipid solution, but it won't mix with water. Which term describes lipids' relationship with water?",
+                options: ["Hydrophilic", "Hydrophobic", "Soluble", "Polar"],
+                answer: "Hydrophobic",
+                hint: "Consider what happens when you pour cooking oil into a glass of water.",
+                explanation: "Lipids are hydrophobic, meaning they 'fear' water and do not dissolve in it.",
+                relatedCard: "c3"
+            },
+            {
+                type: "mcq",
+                question: "To access the main computer, you need the master code molecule. What is the primary function of nucleic acids like DNA?",
+                options: ["Storing genetic information", "Providing quick energy", "Building muscle tissue", "Forming cell membranes"],
+                answer: "Storing genetic information",
+                hint: "They act as the instruction manual for the cell.",
+                explanation: "Nucleic acids store and transmit the genetic information required to build cellular components.",
+                relatedCard: "c5"
+            },
+            {
+                type: "mcq",
+                question: "A large molecule made of many repeating sub-units (like a chain) is generally called a:",
+                options: ["Monomer", "Polymer", "Isotope", "Atom"],
+                answer: "Polymer",
+                hint: "The prefix 'poly-' means many.",
+                explanation: "Polymers are macromolecules made by linking many smaller monomers together.",
+                relatedCard: "c1"
+            },
+            {
+                type: "mcq",
+                question: "You must repair a damaged cell barrier. Cell membranes are primarily composed of a bilayer of which molecule?",
+                options: ["Triglycerides", "Starch", "Phospholipids", "Enzymes"],
+                answer: "Phospholipids",
+                hint: "It's a specific type of lipid that has a 'head' and two 'tails'.",
+                explanation: "Phospholipids form the foundational bilayer of all cell membranes due to their unique structure.",
+                relatedCard: "c3"
+            },
+            {
+                type: "mcq",
+                question: "A chemical reaction in the lab is happening too slowly. You need to add an enzyme. Enzymes belong to which class of biomolecules?",
+                options: ["Carbohydrates", "Lipids", "Proteins", "Nucleic Acids"],
+                answer: "Proteins",
+                hint: "These molecules fold into complex 3D shapes to do their specialized work.",
+                explanation: "Almost all enzymes are proteins, relying on their specific shape to catalyze chemical reactions.",
+                relatedCard: "c4"
+            },
+            {
+                type: "mcq",
+                question: "Identify the monosaccharide from the list below to complete the synthesis:",
+                options: ["DNA", "Cellulose", "Glucose", "Hemoglobin"],
+                answer: "Glucose",
+                hint: "It's a simple sugar, often referred to as blood sugar.",
+                explanation: "Glucose is a single sugar unit (monosaccharide), whereas cellulose is a polysaccharide.",
+                relatedCard: "c2"
+            },
+            {
+                type: "mcq",
+                question: "What ultimately determines the specific function a protein can perform in a cell?",
+                options: ["Its overall weight", "Its 3D shape/structure", "The number of carbons it has", "Its color"],
+                answer: "Its 3D shape/structure",
+                hint: "Form dictates function. Think of how a key must fit perfectly into a lock.",
+                explanation: "A protein's unique three-dimensional folded shape allows it to interact specifically with other molecules.",
+                relatedCard: "c4"
+            },
+            {
+                type: "input",
+                question: "Type the 3-letter abbreviation of the nucleic acid that typically consists of a single strand and helps build proteins (Use uppercase):",
+                answer: "RNA",
+                hint: "It is the single-stranded counterpart to DNA.",
+                explanation: "RNA (Ribonucleic Acid) is typically single-stranded and translates DNA's instructions into proteins.",
+                relatedCard: "c5"
+            }
+        ];
+
+        // --- APP STATE ---
+        const app = {
+            view: 'intro', // intro, discover, challenge, summary
+            currentChallenge: 0,
+            attemptsRemaining: 2,
+            score: 0,
+            wrongAnswers: [], // stores indexes of failed challenges
+            hasFinished: false,
+
+            init() {
+                this.render();
+            },
+
+            setView(newView, cardIdToHighlight = null) {
+                // Prevent error if trying to access challenge when game is finished
+                if (newView === 'challenge' && this.hasFinished) {
+                    newView = 'summary';
+                }
+
+                this.view = newView;
+                
+                // Update nav buttons UI
+                const nav = document.getElementById('nav-buttons');
+                const btnDiscover = document.getElementById('btn-nav-discover');
+                const btnChallenge = document.getElementById('btn-nav-challenge');
+                
+                if (this.view === 'intro' || this.view === 'summary') {
+                    nav.classList.add('hidden');
+                } else {
+                    nav.classList.remove('hidden');
+                    
+                    // Hide the Challenge nav button if the game is already finished
+                    if (this.hasFinished) {
+                        btnChallenge.classList.add('hidden');
+                    } else {
+                        btnChallenge.classList.remove('hidden');
+                    }
+
+                    if (this.view === 'discover') {
+                        btnDiscover.classList.replace('bg-slate-700', 'bg-teal-600');
+                        btnChallenge.classList.replace('bg-teal-600', 'bg-slate-700');
+                    } else if (this.view === 'challenge') {
+                        btnChallenge.classList.replace('bg-slate-700', 'bg-teal-600');
+                        btnDiscover.classList.replace('bg-teal-600', 'bg-slate-700');
+                    }
+                }
+
+                this.render(cardIdToHighlight);
+            },
+
+            submitAnswer(userAnswer) {
+                const challenge = challenges[this.currentChallenge];
+                const feedbackDiv = document.getElementById('feedback-area');
+                const isCorrect = userAnswer.toString().trim().toUpperCase() === challenge.answer.toUpperCase();
+
+                if (isCorrect) {
+                    this.score++;
+                    feedbackDiv.innerHTML = `
+                        <div class="bg-green-900/50 border border-green-500 text-green-200 p-4 rounded-xl flex items-start gap-3 mt-6">
+                            <span class="text-2xl">✓</span>
+                            <div>
+                                <h3 class="font-bold text-lg text-green-400">Access Granted!</h3>
+                                <p class="mt-1">${challenge.explanation}</p>
+                            </div>
+                        </div>
+                        <button onclick="app.nextChallenge()" class="mt-6 w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-6 rounded-xl transition-colors text-lg focus:outline-none focus:ring-4 focus:ring-blue-400">
+                            Continue to Next Zone ➔
+                        </button>
+                    `;
+                    this.disableInputs();
+                } else {
+                    this.attemptsRemaining--;
+                    if (this.attemptsRemaining > 0) {
+                        feedbackDiv.innerHTML = `
+                            <div class="bg-yellow-900/50 border border-yellow-500 text-yellow-200 p-4 rounded-xl flex items-start gap-3 mt-6">
+                                <span class="text-2xl">✗</span>
+                                <div>
+                                    <h3 class="font-bold text-lg text-yellow-400">Incorrect. System Locked.</h3>
+                                    <p class="mt-1"><strong>Hint:</strong> ${challenge.hint}</p>
+                                    <p class="mt-2 text-sm opacity-80">${this.attemptsRemaining} attempt(s) remaining.</p>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // Failed completely
+                        if (!this.wrongAnswers.includes(this.currentChallenge)) {
+                            this.wrongAnswers.push(this.currentChallenge);
+                        }
+                        const card = discoverCards.find(c => c.id === challenge.relatedCard);
+                        feedbackDiv.innerHTML = `
+                            <div class="bg-red-900/50 border border-red-500 text-red-200 p-4 rounded-xl flex items-start gap-3 mt-6">
+                                <span class="text-2xl">✗</span>
+                                <div>
+                                    <h3 class="font-bold text-lg text-red-400">Security Breach! Door Failed.</h3>
+                                    <p class="mt-1"><strong>Correct Answer:</strong> ${challenge.answer}</p>
+                                    <p class="mt-2 text-sm">${challenge.explanation}</p>
+                                    <button onclick="app.setView('discover', '${challenge.relatedCard}')" class="mt-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 px-4 py-2 rounded text-sm transition-colors flex items-center gap-2">
+                                        📖 Review Concept: ${card.title}
+                                    </button>
+                                </div>
+                            </div>
+                            <button onclick="app.nextChallenge()" class="mt-6 w-full bg-slate-600 hover:bg-slate-500 text-white font-bold py-4 px-6 rounded-xl transition-colors text-lg focus:outline-none focus:ring-4 focus:ring-slate-400">
+                                Move to Next Door ➔
+                            </button>
+                        `;
+                        this.disableInputs();
+                    }
+                }
+            },
+
+            disableInputs() {
+                const buttons = document.querySelectorAll('.option-btn');
+                buttons.forEach(btn => {
+                    btn.disabled = true;
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                    btn.classList.remove('hover:bg-slate-600', 'hover:border-teal-400');
+                });
+                const input = document.getElementById('text-input');
+                if (input) input.disabled = true;
+                const submitBtn = document.getElementById('submit-btn');
+                if (submitBtn) submitBtn.disabled = true;
+            },
+
+            nextChallenge() {
+                this.currentChallenge++;
+                this.attemptsRemaining = 2;
+                if (this.currentChallenge >= challenges.length) {
+                    this.hasFinished = true;
+                    this.setView('summary');
+                } else {
+                    this.render();
+                }
+            },
+
+            resetGame() {
+                this.currentChallenge = 0;
+                this.attemptsRemaining = 2;
+                this.score = 0;
+                this.wrongAnswers = [];
+                this.hasFinished = false;
+                this.setView('intro');
+            },
+
+            render(cardIdToHighlight = null) {
+                const container = document.getElementById('app-content');
+                
+                if (this.view === 'intro') {
+                    container.innerHTML = `
+                        <div class="flex-grow flex flex-col justify-center items-center text-center max-w-2xl mx-auto space-y-8 fade-in">
+                            <div class="bg-slate-800 p-6 md:p-10 rounded-2xl border border-slate-700 shadow-2xl">
+                                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Bio-Lab Escape Room</h2>
+                                <p class="text-lg text-slate-300 mb-6 text-left">
+                                    You are locked inside a high-tech biology laboratory. The only way to unlock the main doors and escape is to prove your knowledge of the four macromolecules of life: Carbohydrates, Lipids, Proteins, and Nucleic Acids.
+                                </p>
+                                <div class="bg-slate-900 p-4 rounded-xl text-left border border-slate-700 mb-8 space-y-2">
+                                    <p class="flex items-center gap-2"><span class="text-teal-400">📖</span> <strong>Discover:</strong> Read the intel cards at any time to learn the concepts.</p>
+                                    <p class="flex items-center gap-2"><span class="text-teal-400">🧩</span> <strong>Challenge:</strong> Solve 10 security doors.</p>
+                                    <p class="flex items-center gap-2"><span class="text-teal-400">⚙️</span> <strong>Rules:</strong> 2 attempts per door. Hints provided after 1st error.</p>
+                                </div>
+                                <button onclick="app.setView('discover')" class="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-4 px-8 rounded-xl transition-all transform hover:scale-105 text-xl shadow-lg focus:outline-none focus:ring-4 focus:ring-teal-400">
+                                    Start Mission
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } 
+                else if (this.view === 'discover') {
+                    let cardsHtml = discoverCards.map(card => `
+                        <div id="card-${card.id}" class="bg-slate-800 rounded-xl p-6 border-2 transition-all ${cardIdToHighlight === card.id ? 'border-teal-400 shadow-[0_0_15px_rgba(45,212,191,0.5)]' : 'border-slate-700 hover:border-slate-500'}">
+                            <h3 class="text-xl font-bold text-teal-300 mb-3">${card.title}</h3>
+                            <p class="text-slate-300 leading-relaxed">${card.content}</p>
+                        </div>
+                    `).join('');
+
+                    container.innerHTML = `
+                        <div class="fade-in pb-10">
+                            <div class="flex justify-between items-center mb-6">
+                                <h2 class="text-2xl font-bold text-white">Intel Database (Discover)</h2>
+                                ${!this.hasFinished ? `
+                                <button onclick="app.setView('challenge')" class="bg-teal-600 hover:bg-teal-500 text-white font-bold py-2 px-6 rounded-lg transition-colors focus:outline-none focus:ring-4 focus:ring-teal-400">
+                                    Go to Challenge ➔
+                                </button>
+                                ` : ''}
+                            </div>
+                            <p class="text-slate-400 mb-8">Review these core concepts to help you bypass the security doors.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                ${cardsHtml}
+                            </div>
+                        </div>
+                    `;
+
+                    if (cardIdToHighlight) {
+                        setTimeout(() => {
+                            const el = document.getElementById(`card-${cardIdToHighlight}`);
+                            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 100);
+                    }
+                }
+                else if (this.view === 'challenge') {
+                    const challenge = challenges[this.currentChallenge];
+                    let inputHtml = '';
+
+                    if (challenge.type === 'mcq') {
+                        inputHtml = `
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+                                ${challenge.options.map(opt => `
+                                    <button onclick="app.submitAnswer('${opt.replace(/'/g, "\\'")}')" class="option-btn bg-slate-700 hover:bg-slate-600 border-2 border-slate-600 hover:border-teal-400 text-left px-6 py-4 rounded-xl text-lg text-white transition-all focus:outline-none focus:ring-4 focus:ring-teal-500">
+                                        ${opt}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        `;
+                    } else if (challenge.type === 'input') {
+                        inputHtml = `
+                            <div class="mt-6 flex flex-col sm:flex-row gap-4">
+                                <input type="text" id="text-input" class="flex-grow bg-slate-900 border-2 border-slate-600 focus:border-teal-400 rounded-xl px-6 py-4 text-xl text-white outline-none" placeholder="Enter answer here..." onkeypress="if(event.key === 'Enter') document.getElementById('submit-btn').click()">
+                                <button id="submit-btn" onclick="app.submitAnswer(document.getElementById('text-input').value)" class="bg-teal-600 hover:bg-teal-500 text-white font-bold py-4 px-8 rounded-xl transition-colors text-lg focus:outline-none focus:ring-4 focus:ring-teal-400">
+                                    Submit
+                                </button>
+                            </div>
+                        `;
+                    }
+
+                    container.innerHTML = `
+                        <div class="fade-in max-w-3xl w-full mx-auto">
+                            <div class="flex justify-between items-center mb-8 text-slate-400 font-semibold">
+                                <span>Security Door ${this.currentChallenge + 1} of ${challenges.length}</span>
+                                <span>Attempts left: <span class="text-white">${this.attemptsRemaining}</span></span>
+                            </div>
+                            
+                            <div class="bg-slate-800 rounded-2xl p-6 md:p-8 border border-slate-700 shadow-xl">
+                                <h2 class="text-2xl md:text-3xl font-bold text-white mb-4 leading-tight">${challenge.question}</h2>
+                                
+                                ${inputHtml}
+
+                                <div id="feedback-area" class="mt-4"></div>
+                            </div>
+                        </div>
+                    `;
+                }
+                else if (this.view === 'summary') {
+                    let errorsHtml = '';
+                    if (this.wrongAnswers.length === 0) {
+                        errorsHtml = `
+                            <div class="bg-green-900/30 border border-green-500 p-6 rounded-xl text-center mb-8">
+                                <span class="text-4xl block mb-2">🏆</span>
+                                <h3 class="text-xl font-bold text-green-400">Perfect Score!</h3>
+                                <p class="text-green-200 mt-2">You bypassed all security doors without a single final error.</p>
+                            </div>
+                        `;
+                    } else {
+                        errorsHtml = `
+                            <h3 class="text-xl font-bold text-white mb-4 mt-8 flex items-center gap-2"><span class="text-red-400">⚠</span> Security Log: Errors to Review</h3>
+                            <div class="space-y-4 mb-8">
+                                ${this.wrongAnswers.map(index => {
+                                    const q = challenges[index];
+                                    const card = discoverCards.find(c => c.id === q.relatedCard);
+                                    return `
+                                        <div class="bg-slate-800 border border-slate-600 rounded-xl p-5">
+                                            <p class="font-semibold text-slate-300 mb-2">Q: ${q.question}</p>
+                                            <p class="text-green-400 font-medium mb-1">✓ Correct Answer: ${q.answer}</p>
+                                            <p class="text-slate-400 text-sm mb-3">${q.explanation}</p>
+                                            <button onclick="app.setView('discover', '${q.relatedCard}')" class="text-teal-400 hover:text-teal-300 text-sm font-semibold underline underline-offset-2 flex items-center gap-1">
+                                                Review Concept: ${card.title} ➔
+                                            </button>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        `;
+                    }
+
+                    container.innerHTML = `
+                        <div class="fade-in max-w-3xl w-full mx-auto pb-12">
+                            <div class="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-xl text-center">
+                                <h2 class="text-3xl md:text-4xl font-bold text-white mb-2">Mission Complete</h2>
+                                <p class="text-slate-400 text-lg mb-8">You have unlocked the laboratory.</p>
+                                
+                                <div class="inline-block bg-slate-900 border-2 border-teal-500 rounded-full px-8 py-4 mb-8 shadow-[0_0_20px_rgba(45,212,191,0.2)]">
+                                    <span class="text-4xl font-black text-white">${this.score}</span>
+                                    <span class="text-2xl text-slate-400 font-bold"> / ${challenges.length}</span>
+                                </div>
+                                
+                                ${errorsHtml}
+
+                                <div class="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+                                    <button onclick="app.setView('discover')" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-6 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400">
+                                        📖 Review All Intel
+                                    </button>
+                                    <button onclick="app.resetGame()" class="bg-teal-600 hover:bg-teal-500 text-white font-bold py-3 px-6 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-teal-400">
+                                        🔄 Restart Mission
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        };
+
+        // Initialize app on load
+        window.onload = () => {
+            app.init();
+        };
+    </script>
+</body>
+</html>
